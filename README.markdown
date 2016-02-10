@@ -113,6 +113,7 @@ The gce_compute module provides the following resource types:
   instances. Firewalls and instances are associated with networks.
 * `gce_forwardingrule`  - Load balancer forwarding rules.
 * `gce_httphealthcheck`  - Load balancer HTTP health checking.
+* `gce_httpshealthcheck`  - Load balancer HTTPS health checking.
 * `gce_targetpool` - Load balancer collection of instances.
 * `gce_targetpoolhealthcheck`  - Assignment of a health-check to a targetpool.
 * `gce_targetpoolinstance`  - Assignment of an instance to a targetpool.
