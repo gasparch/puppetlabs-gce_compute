@@ -1,19 +1,52 @@
 require 'puppet_x/puppetlabs/name_validator'
 
+require 'pry'
+
 Puppet::Type.newtype(:gce_instance) do
   desc 'Google Compute Engine virtual machine instance'
 
-  ensurable
+  ensurable do
+    #      def change_to_s(current_value, newvalue)
+    #        return "Purged #{resource}" if newvalue == :purged
+    #        super
+    #      end
+
+    newvalue(:terminated) do
+#      byebug
+      # do not try to stop non existing instances
+      if provider.ensure != :absent then
+        provider.stop
+      end
+    end 
+
+    newvalue(:present) do
+#      byebug
+      provider.bring_online
+    end
+
+    newvalue(:absent) do
+#      byebug
+      provider.destroy
+    end
+
+    def retrieve
+      @resource.provider.ensure
+      end
+  end
 
   newparam(:name, :namevar => true) do
     desc 'The name of the instance'
     validate do |v|
-      PuppetX::Puppetlabs::NameValidator.validate(v)
+      host_part = v.sub(%r{^.*/}, '')
+      PuppetX::Puppetlabs::NameValidator.validate(host_part)
     end
   end
 
   newparam(:zone) do
     desc 'The zone of the instance.'
+    validate do |v|
+      PuppetX::Puppetlabs::NameValidator.validate(v)
+    end
   end
 
   newparam(:address) do
@@ -33,15 +66,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:image) do
-   desc 'Specifies the boot image for the instance.'
-  end
-
-  newparam(:machine_type) do
-    desc 'Specifies the machine type used for the instance.'
-  end
-
-  newparam(:metadata) do
-    desc 'Metadata to be made available to the guest operating system running on the instances.'
+    desc 'Specifies the boot image for the instance.'
   end
 
   newparam(:network) do
@@ -67,10 +92,6 @@ Puppet::Type.newtype(:gce_instance) do
   newparam(:startup_script_timeout) do
     desc 'When provided with :block_for_startup_script, the blocking will timeout after this time (in seconds) has elapsed, and the resource creation will fail, (although the instance will likely have been created).'
     munge { |t| Float(t) }
-  end
-
-  newparam(:tags) do
-    desc 'Specifies a list of tags to apply to the instance for identifying the instances to which network firewall rules will apply.'
   end
 
   newparam(:puppet_master) do
@@ -104,6 +125,38 @@ Puppet::Type.newtype(:gce_instance) do
     end
   end
 
+  newparam(:force_updates) do
+    desc 'Permit instance restart or deletion if other parameter changes require it.'
+
+    newvalues(:restart, :rebuild, :false)
+    defaultto :false
+  end
+
+  newproperty(:zone) do
+    desc 'The zone of the instance.'
+  end
+
+  newproperty(:machine_type) do
+    desc 'Specifies the machine type used for the instance.'
+  end
+
+  newproperty(:tags, :array_matching => :all) do
+    desc 'Specifies a list of tags to apply to the instance for identifying the instances to which network firewall rules will apply.'
+    def insync?(is)
+      # The current value may be nil and we don't
+      # want to call sort on it so make sure we have arrays
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is.sort == @should.sort
+      else
+        is == @should
+      end
+    end
+  end
+
+  newproperty(:metadata) do
+    desc 'Metadata to be made available to the guest operating system running on the instances.'
+  end
+
   autorequire :gce_disk do
     self[:boot_disk]
   end
@@ -113,6 +166,10 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   validate do
+    if self[:name].match(%r{/})
+      self[:zone],self[:name] = self[:name].split('/')
+    end
+
     fail('You must specify a zone for the instance.') unless self[:zone]
     if self[:block_for_startup_script]
       fail('You must specify a startup script if :block_for_startup_script is set to true.') unless self[:startup_script]
@@ -121,4 +178,10 @@ Puppet::Type.newtype(:gce_instance) do
       fail(':block_for_startup_script must be set to true if you specify :startup_script_timeout.') unless self[:block_for_startup_script]
     end
   end
+
+  def refresh
+    provider.refresh
+  end
 end
+
+# vim: sw=2 ts=2 expandtab
