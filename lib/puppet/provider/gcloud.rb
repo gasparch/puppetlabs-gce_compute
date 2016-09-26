@@ -3,8 +3,6 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-require 'pry'
-
 class Puppet::Provider::Gcloud < Puppet::Provider
   THREAD_COUNT = 8  # tweak this number for maximum performance.
 
@@ -289,9 +287,9 @@ class Puppet::Provider::Gcloud < Puppet::Provider
   end
 
   def self.last_component x# {{{
-	  if x.nil?
-		  byebug
-	  end
+#	  if x.nil?
+#		  byebug
+#	  end
 
 	  x.split('/').last
   end# }}}

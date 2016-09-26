@@ -1,7 +1,5 @@
 require 'puppet_x/puppetlabs/name_validator'
 
-require 'pry'
-
 Puppet::Type.newtype(:gce_instance_template_generator) do
   desc 'Google Compute Engine instance template manager'
 

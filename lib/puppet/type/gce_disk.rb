@@ -4,20 +4,6 @@ Puppet::Type.newtype(:gce_disk) do
   desc 'Google Compute Engine persistent disk.'
 
   ensurable 
-  #do
-#	  newvalue(:present) do
-#		  byebug
-#		  if provider.ensure == :absent then
-#			  provider.create
-#		  else
-#			  provider.start
-#		  end
-#	  end
-#	  newvalue(:absent) do
-#		  byebug
-#		  provider.destroy
-#	  end
-#  end
 
   newparam(:name, :namevar => true) do
     desc 'The name of the disk.'

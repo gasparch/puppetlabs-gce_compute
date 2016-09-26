@@ -4,7 +4,6 @@ require 'set'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'pry'
 
 Puppet::Type.type(:gce_disk).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   confine :gcloud_compatible_version => true

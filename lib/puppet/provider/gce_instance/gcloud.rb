@@ -53,7 +53,6 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end# }}}
 
   def start# {{{
-#	byebug
     @property_flush[:ensure] = :present
   end# }}}
 
@@ -180,9 +179,6 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 			  output[:metadata][item['key']] = item['value']
 		  end
 	  end
-#	  if host_data['status'] == 'TERMINATED'
-#		byebug
-#	  end
 
 	  output[:ensure] = case host_data['status'] 
 						when 'RUNNING'

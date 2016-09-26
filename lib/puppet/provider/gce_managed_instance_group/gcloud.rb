@@ -8,8 +8,6 @@ require 'net/http'
 require 'uri'
 require 'json'
 
-require 'pry'
-
 Puppet::Type.type(:gce_managed_instance_group).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   confine :gcloud_compatible_version => true
   commands :gcloud => "gcloud"
@@ -440,9 +438,6 @@ Puppet::Type.type(:gce_managed_instance_group).provide(:gcloud, :parent => Puppe
 	  @property_flush[:ensure] = :present
   end
 
-  def refresh
-	  byebug
-  end
 end
 
 

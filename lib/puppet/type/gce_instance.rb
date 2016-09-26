@@ -1,7 +1,5 @@
 require 'puppet_x/puppetlabs/name_validator'
 
-require 'pry'
-
 Puppet::Type.newtype(:gce_instance) do
   desc 'Google Compute Engine virtual machine instance'
 
@@ -12,7 +10,6 @@ Puppet::Type.newtype(:gce_instance) do
     #      end
 
     newvalue(:terminated) do
-#      byebug
       # do not try to stop non existing instances
       if provider.ensure != :absent then
         provider.stop
@@ -20,12 +17,10 @@ Puppet::Type.newtype(:gce_instance) do
     end 
 
     newvalue(:present) do
-#      byebug
       provider.bring_online
     end
 
     newvalue(:absent) do
-#      byebug
       provider.destroy
     end
 

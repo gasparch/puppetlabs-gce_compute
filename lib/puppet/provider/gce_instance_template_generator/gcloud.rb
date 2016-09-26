@@ -300,7 +300,6 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
   end# }}}
 
   def bring_online
-	  byebug
 	  @property_hash[:ensure] = self.ensure
 	  @property_flush[:ensure] = :present
 	  pp self.ensure
@@ -313,7 +312,6 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
   end
 
   def refresh
-	  byebug
 	  return
 	  if not @just_created
 		  if self.ensure == :absent

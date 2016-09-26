@@ -4,7 +4,6 @@ require 'set'
 require 'net/http'
 require 'uri'
 require 'json'
-require 'pry'
 
 Puppet::Type.type(:gce_projectmetadata).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
 #  confine :gcloud_compatible_version => true
@@ -44,7 +43,6 @@ Puppet::Type.type(:gce_projectmetadata).provide(:gcloud, :parent => Puppet::Prov
   end# }}}
 
   def self.instances# {{{
-#	  byebug
 	  class_instance = Puppet::Type::Gce_projectmetadata::ProviderGcloud.new
 	  disks = class_instance.get_variable_list
 	  disks.map do |value|
