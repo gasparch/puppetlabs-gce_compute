@@ -39,7 +39,9 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
      :custom_memory_size => '--custom-memory',
      :custom_cpu_count   => '--custom-cpu',
      :machine_type       => '--machine-type',
-#     :network            => '--network',
+     :network            => '--network',
+     :subnet 			 => '--subnet',
+     :region 			 => '--region',
 #     :maintenance_policy => '--maintenance-policy',
 #     :scopes             => '--scopes',
      :tags               => '--tags'}
@@ -228,6 +230,18 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
 		  output[:image] = last_component disk_params['sourceImage']
 	  end
 
+	  if template_data['networkInterfaces'].length > 0 
+		  net = template_data['networkInterfaces'][0]
+		  if net['subnetwork']
+			  output[:subnet] = last_component net['subnetwork']
+			  output[:region] = net['subnetwork'].split('/')[-3]
+		  else
+			  if net['network']
+				  output[:network] = last_component net['network']
+			  end
+		  end
+	  end
+
 #	  if template_data['status'] == 'TERMINATED'
 #		byebug
 #	  end
@@ -304,23 +318,9 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
 	  @property_flush[:ensure] = :present
 	  pp self.ensure
 	  return
-	  if self.ensure == :absent
-		  create
-	  else
-		  start
-	  end
   end
 
   def refresh
 	  return
-	  if not @just_created
-		  if self.ensure == :absent
-			  create
-			  debug "gce_instance refresh: rebuilding instance"
-		  else
-			  delete_instance
-			  start_instance
-		  end
-	  end
   end
 end

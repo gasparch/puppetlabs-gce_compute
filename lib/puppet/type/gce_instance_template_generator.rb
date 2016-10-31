@@ -3,35 +3,6 @@ require 'puppet_x/puppetlabs/name_validator'
 Puppet::Type.newtype(:gce_instance_template_generator) do
   desc 'Google Compute Engine instance template manager'
 
-#  ensurable do
-##      def change_to_s(current_value, newvalue)
-##        return "Purged #{resource}" if newvalue == :purged
-##        super
-##      end
-#
-#	  newvalue(:terminated) do
-#		  byebug
-#		  # do not try to stop non existing instances
-#		  if provider.ensure != :absent then
-#			provider.stop
-#		  end
-#	  end 
-#
-#	  newvalue(:present) do
-#		  byebug
-#		  provider.bring_online
-#	  end
-#
-#	  newvalue(:absent) do
-#		  byebug
-#		  provider.destroy
-#	  end
-#
-#	  def retrieve
-#		  @resource.provider.ensure
-#	  end
-#  end
-
   newparam(:name, :namevar => true) do
     desc 'The name of the instance'
     validate do |v|
@@ -140,6 +111,18 @@ Puppet::Type.newtype(:gce_instance_template_generator) do
     desc 'The disk type of the instance.'
   end
 
+  newproperty(:network) do
+    desc 'Specifies the network that the instance will be part of.'
+  end
+
+  newproperty(:subnet) do
+    desc 'Specifies the sub-network that the instance will be part of.'
+  end
+
+  newproperty(:region) do
+    desc 'Specifies in which region start instance.'
+  end
+
   newproperty(:machine_type) do
     desc 'Specifies the machine type used for the instance.'
   end
@@ -177,6 +160,9 @@ Puppet::Type.newtype(:gce_instance_template_generator) do
 #  end
 
   validate do
+	if self[:subnet] and !self[:region]
+		fail('You must specify a region when specifing subnet')
+	end
 #	if self[:name].match(%r{/})
 #		self[:zone],self[:name] = self[:name].split('/')
 #	end

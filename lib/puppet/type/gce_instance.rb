@@ -64,10 +64,6 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies the boot image for the instance.'
   end
 
-  newparam(:network) do
-    desc 'Specifies the network that the instance will be part of.'
-  end
-
   newparam(:maintenance_policy) do
     desc 'Specifies the behavior of the instances when their host machines undergo maintenance.'
   end
@@ -130,6 +126,15 @@ Puppet::Type.newtype(:gce_instance) do
   newproperty(:zone) do
     desc 'The zone of the instance.'
   end
+
+  newproperty(:network) do
+    desc 'Specifies the network that the instance will be part of.'
+  end
+
+  newproperty(:subnet) do
+    desc 'Specifies the sub-network that the instance will be part of.'
+  end
+
 
   newproperty(:machine_type) do
     desc 'Specifies the machine type used for the instance.'

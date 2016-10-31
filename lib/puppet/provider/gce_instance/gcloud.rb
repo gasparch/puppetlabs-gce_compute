@@ -34,6 +34,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
      :image              => '--image',
      :machine_type       => '--machine-type',
      :network            => '--network',
+     :subnet             => '--subnet',
      :maintenance_policy => '--maintenance-policy',
      :scopes             => '--scopes',
      :tags               => '--tags'}
@@ -180,7 +181,18 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 		  end
 	  end
 
-	  output[:ensure] = case host_data['status'] 
+	  if host_data['networkInterfaces'].length > 0
+		  net = host_data['networkInterfaces'][0]
+		  if net['subnetwork']
+			  output[:subnet] = last_component net['subnetwork']
+		  else
+			  if net['network']
+				  output[:network] = last_component net['network']
+			  end
+		  end
+	  end
+
+	  output[:ensure] = case host_data['status']
 						when 'RUNNING'
 							:present
 						when 'TERMINATED'
@@ -221,6 +233,14 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 
   def machine_type=(value)# {{{
 	  @property_flush[:machine_type] = value
+  end# }}}
+
+  def network=(value)# {{{
+	  @property_flush[:network] = value
+  end# }}}
+
+  def subnet=(value)# {{{
+	  @property_flush[:subnet] = value
   end# }}}
 
   #  curl -u "oauth2accesstoken:$(gcloud auth print-access-token)" https://eu.gcr.io/v2/swarmcloudtest/goverlord/tags/list
@@ -267,7 +287,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       raise Puppet::Error, "Parameters requiring running instance restart need explicit permission, set force_updates => restart or rebuild."
 	end
 
-	if require_rebuild_flush.length > 0 
+	if require_rebuild_flush.length > 0
 		if @property_hash[:ensure] == :terminated
 			raise Puppet::Error, "Parameters requiring instance deletion/rebuild need instance to be either present (running) or absent (non existent), now it is stopped."
 		end
@@ -307,7 +327,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 	  zone = last_component @property_hash[:zone]
 
 	  if properties[:tags]
-		  data = { 
+		  data = {
 			  :items => properties[:tags],
 			  :fingerprint => @property_hash[:tags_fingerprint]
 		  }
