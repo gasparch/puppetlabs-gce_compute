@@ -80,6 +80,7 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
     args = build_gcloud_args('create') + build_gcloud_flags(gcloud_optional_create_args)
     append_disk_size(args, resource)
     append_can_ip_forward_args(args, resource)
+    append_custom_extensions(args, resource)
     append_metadata_args(args, resource)
 #    append_startup_script_args(args, resource)
     gcloud(*args)
@@ -88,6 +89,10 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
 
   def append_can_ip_forward_args(args, resource)# {{{
     args << '--can-ip-forward' if resource[:can_ip_forward]
+  end# }}}
+
+  def append_custom_extensions(args, resource)# {{{
+    args << '--custom-extensions ' if resource[:custom_extensions]
   end# }}}
 
   def append_disk_size(args, resource)# {{{
@@ -148,7 +153,7 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
   # https://www.googleapis.com/compute/v1/project/<project-id>/aggregated/instances
   # see https://cloud.google.com/compute/docs/reference/latest/instances/aggregatedList
   def get_instance_template_meta_list# {{{
-	full_list = (gce_api_GET "global/instanceTemplates")['items'] || []
+	full_list = (gce_api_GET "global/instanceTemplates", :beta)['items'] || []
 
 	def find_latest(acc, template)
 		name = template['name']
@@ -206,6 +211,14 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
 	  if matches = template_data['machineType'].match(/^custom-(\d+)-(\d+)$/)
 		  output[:custom_cpu_count] = matches[1]
 		  output[:custom_memory_size] = matches[2].to_f / 1024
+		  output[:custom_extensions] = false
+		  output.delete(:machine_type)
+	  end
+
+	  if matches = template_data['machineType'].match(/^custom-(\d+)-(\d+)-ext$/)
+		  output[:custom_cpu_count] = matches[1]
+		  output[:custom_memory_size] = matches[2].to_f / 1024
+		  output[:custom_extensions] = true
 		  output.delete(:machine_type)
 	  end
 

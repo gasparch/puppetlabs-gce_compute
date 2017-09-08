@@ -135,6 +135,10 @@ Puppet::Type.newtype(:gce_instance_template_generator) do
     desc 'Specifies memory size for custom machine type for the instance.'
   end
 
+  newproperty(:custom_extensions) do
+    desc 'Support custom extensions for instances'
+  end
+
   newproperty(:tags, :array_matching => :all) do
     desc 'Specifies a list of tags to apply to the instance for identifying the instances to which network firewall rules will apply.'
 	defaultto []
