@@ -92,7 +92,7 @@ Puppet::Type.type(:gce_instance_template_generator).provide(:gcloud, :parent => 
   end# }}}
 
   def append_custom_extensions(args, resource)# {{{
-    args << '--custom-extensions ' if resource[:custom_extensions]
+    args << '--custom-extensions' if resource[:custom_extensions]
   end# }}}
 
   def append_disk_size(args, resource)# {{{
